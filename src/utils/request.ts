@@ -41,6 +41,7 @@ export const requestUploadFile = async ({ filePath, name = "fileUpload" }: Pick<
       throw new Error(error.errMsg || error.errorMessage)
     }
   })
+  console.log("res", res)
   return res
 } 
 

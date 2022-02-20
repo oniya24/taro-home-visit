@@ -13,7 +13,7 @@ const VisitRecord = (props: IVisitRecord) => {
       <View>时间: {props.time}</View>
       <View>地点: {props.place}</View>
       <View>记录: {props.text}</View>
-      <View>图片: <Image src={props.photo}></Image></View>
+      <View><Image mode="widthFix" src={props.photo}></Image></View>
     </AtCard>
   )
 }

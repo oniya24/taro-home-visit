@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { View } from '@tarojs/components';
+import { View, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { IEmployee } from '../../types/employee';
 import { goUrl } from '../../utils/index';
@@ -16,7 +16,7 @@ const Department = () => {
   }, [ id ])
   
   return (
-    <View>
+    <ScrollView style={{ height: '100vh' }}>
       <AtList>
         {
           employeeList?.map((item) => {
@@ -29,7 +29,7 @@ const Department = () => {
           })
         }
       </AtList>
-    </View>
+    </ScrollView>
   )
 }
 
