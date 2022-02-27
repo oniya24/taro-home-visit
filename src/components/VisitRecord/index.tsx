@@ -1,6 +1,7 @@
 import { View, Image } from "@tarojs/components"
 import { IVisitRecord } from 'src/types/visitRecord'
 import { AtCard } from 'taro-ui'
+import ImageBox from '../ImageBox'
 import './index.less'
 
 const VisitRecord = ({
@@ -14,16 +15,20 @@ const VisitRecord = ({
   return (
     <AtCard
       style={{ marginBottom: 10 }}
-      extra={`被家访人: ${interviewees}`}
-      title={visit}
+      title={`${visit}家访记录`}
     >
-      <View>时间: {time}</View>
-      <View>地点: {place}</View>
-      <View>记录: {text}</View>
-      <View>
+      <View className="VisitListItem">{`被家访人: ${interviewees}`}</View>
+      <View className="VisitListItem">时间: {time}</View>
+      <View className="VisitListItem">地点: {place}</View>
+      <View className="VisitListItem">记录: {text}</View>
+      <View style={{ display: 'flex' }}>
         {
           photo.map((photoSrc) => {
-            return <Image style={{ width: '30vw', height: '30vw', padding: '1vw' }} src={photoSrc}></Image>
+            return (
+              <View style={{ width: '30%', padding: 4 }}>
+                <ImageBox src={photoSrc}></ImageBox>
+              </View>
+            ) 
           })
         }
       </View>

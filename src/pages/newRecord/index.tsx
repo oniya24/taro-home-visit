@@ -6,6 +6,7 @@ import { requestUploadFile } from "../../utils/request";
 import { goUrl } from "../../utils";
 import { AtInput, AtList, AtListItem, AtTextarea, AtActivityIndicator, AtImagePicker } from 'taro-ui'
 import { IVisitRecord } from './../../types/visitRecord';
+import ImageBox from "./../../components/ImageBox";
 
 const NewRecord = () => {
   const $instance = Taro.getCurrentInstance()
@@ -28,6 +29,7 @@ const NewRecord = () => {
     photo: [],
   }) 
   const handleFormChange = useCallback((newData: Partial<typeof formData>) => {
+    console.log("change", formData, newData)
     setFormData({
       ...formData,
       ...newData
@@ -38,12 +40,14 @@ const NewRecord = () => {
     try {
       Object.keys(formData).forEach((key) => {
         if(formData[key] == null || formData[key] == undefined || formData[key] == ''){
+          console.error("key", key, formData[key])
           throw new Error("输入有误")
         }
-        if(formData.photo.length === 0){
-          throw new Error("请上传图片")
-        }
       })
+      if(formData.photo.length === 0){
+        console.error("key", formData.photo)
+        throw new Error("请上传图片")
+      }
     } catch(e) {
       Taro.showToast({
         title: "输入有无，请检查",
@@ -108,7 +112,9 @@ const NewRecord = () => {
                     <View style={{ display: 'flex', flexWrap: 'wrap' }}>
                       {
                         formData.photo.map((photoSrc) => {
-                          return <Image style={{ width: '30vw', height: '30vw', padding: '1vw' }}  src={photoSrc}></Image>
+                          return <View style={{ width: '30%', padding: 4 }}>
+                            <ImageBox src={photoSrc}></ImageBox>
+                          </View>
                         })
                       }
                     </View>
