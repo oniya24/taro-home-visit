@@ -4,19 +4,28 @@ import Taro from "@tarojs/taro";
 import { createVisitRecord } from "../../services/visitRecord";
 import { requestUploadFile } from "../../utils/request";
 import { goUrl } from "../../utils";
-import { AtInput, AtList, AtListItem, AtTextarea } from 'taro-ui'
+import { AtInput, AtList, AtListItem, AtTextarea, AtActivityIndicator, AtImagePicker } from 'taro-ui'
+import { IVisitRecord } from './../../types/visitRecord';
 
 const NewRecord = () => {
   const $instance = Taro.getCurrentInstance()
   const id = $instance.router?.params.id
   const [ submitLoading, setSubmitLoading ] = useState(false)
-  const [ formData, setFormData ] = useState({
+  const [ fileUploading, setFileUploading ] = useState(false)
+  const [ imageFilesArray, setImageFilesArray ] = useState<{
+    url: string
+  }[]>([
+    {
+      url: 'https://jimczj.gitee.io/lazyrepay/aragaki3.png',
+    }
+  ])
+  const [ formData, setFormData ] = useState<IVisitRecord>({
     visit: '',
     interviewees: '',
     place: '',
     time: '',
     text: '',
-    photo: '',
+    photo: [],
   }) 
   const handleFormChange = useCallback((newData: Partial<typeof formData>) => {
     setFormData({
@@ -30,6 +39,9 @@ const NewRecord = () => {
       Object.keys(formData).forEach((key) => {
         if(formData[key] == null || formData[key] == undefined || formData[key] == ''){
           throw new Error("输入有误")
+        }
+        if(formData.photo.length === 0){
+          throw new Error("请上传图片")
         }
       })
     } catch(e) {
@@ -84,30 +96,65 @@ const NewRecord = () => {
         </View>
         <AtListItem title='请选择图片'>
           </AtListItem>
-        {
-          !!formData.photo ? 
-          <Image src={formData.photo}></Image> :
-          <Button onClick={() => {
-            Taro.chooseImage({
-              count: 1, // 默认9
-              sizeType: ['compressed'], // 可以指定是原图还是压缩图，默认二者都有
-              sourceType: ['album', 'camera' ], // 可以指定来源是相册还是相机，默认二者都有，在H5浏览器端支持使用 `user` 和 `environment`分别指定为前后摄像头
-              success: async (res)  => {
-                // 返回选定照片的本地文件路径列表，tempFilePath可以作为img标签的src属性显示图片
-                var tempFilePaths = res.tempFilePaths
-                const uploadRes = await requestUploadFile({
-                  name: "fileUpload",
-                  filePath: tempFilePaths[0]
-                })
-                //@ts-ignore
-                handleFormChange({
-                  photo: uploadRes.data
-                })
-              }
-            })
-          }}>        <AtListItem title='点击上传图片'>
-          </AtListItem></Button>
-        }
+        <View style={{ minHeight: '10vh', position: 'relative' }}>
+          <AtActivityIndicator style={{ height: '10vh' }} isOpened={fileUploading} mode='center' content="图片上传中"></AtActivityIndicator>
+          {
+            !fileUploading ?
+            (
+              <>
+                {
+                  formData.photo.length !== 0 ? 
+                  (
+                    <View style={{ display: 'flex', flexWrap: 'wrap' }}>
+                      {
+                        formData.photo.map((photoSrc) => {
+                          return <Image style={{ width: '30vw', height: '30vw', padding: '1vw' }}  src={photoSrc}></Image>
+                        })
+                      }
+                    </View>
+                  )
+                  :
+                  <Button onClick={() => {
+                    Taro.chooseImage({
+                      count: 9, // 默认9
+                      sizeType: ['compressed'], // 可以指定是原图还是压缩图，默认二者都有
+                      sourceType: ['album', 'camera' ], // 可以指定来源是相册还是相机，默认二者都有，在H5浏览器端支持使用 `user` 和 `environment`分别指定为前后摄像头
+                      success: async (res)  => {
+                        console.log(res)
+                        // 返回选定照片的本地文件路径列表，tempFilePath可以作为img标签的src属性显示图片
+                        var tempFilePaths = res.tempFilePaths
+                        try {
+                          setFileUploading(true)
+                          const resResourcePaths = await Promise.all(tempFilePaths.map(async (path) => {
+                            const uploadRes = await requestUploadFile({
+                              name: "fileUpload",
+                              filePath: path
+                            })
+                            return uploadRes.data
+                          }))
+                          // const uploadRes = await requestUploadFile({
+                          //   name: "fileUpload",
+                          //   filePath: tempFilePaths[0]
+                          // })
+                          //@ts-ignore
+                          handleFormChange({
+                            photo: resResourcePaths
+                          })
+                        } catch(e) {
+
+                        } finally {
+                          setFileUploading(false)
+                        }
+                      }
+                    })
+                  }}>        <AtListItem title='点击上传图片'>
+                  </AtListItem></Button>
+                }
+                    </>
+            ) : 
+            null
+          }
+        </View>
         <View className='form-item'>
           <Button loading={submitLoading} type='primary' formType='submit'>提交</Button>  
         </View>

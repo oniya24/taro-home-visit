@@ -1,11 +1,11 @@
 export interface IVisitRecord {
-  id: number
+  id?: number
   /** 家访人 */
   visit: string
   /** 家访对象 */
   interviewees: string
   /** 图片 */
-  photo: string
+  photo: string[]
   /** 地点 */
   place: string
   /** 时间 */
